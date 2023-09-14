@@ -1,0 +1,11 @@
+.map {
+    height: 100%;
+    width: 100%;
+}
+
+.marker {
+    transition: 0.2s ease-in-out fill-opacity;
+    &:hover {
+        fill-opacity: 1;
+    }
+}
