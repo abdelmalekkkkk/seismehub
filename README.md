@@ -11,6 +11,9 @@ This project consists of both backend and frontend components. The backend is im
 # Frontend
 - Nodejs
 - NPM
+- ReactJS
+- Typescript
+- Tailwind
 
 ## Getting Started
 
@@ -30,7 +33,7 @@ npm install
 
 ### Setting Up the Backend
 
-- Download and install Go from the official website. [ASP.NET Core](https://github.com/aspnet/Home)
+- Download and install Go from the [Official Go Website](https://go.dev/)
 - Install dependencies (if any).
 - Download Pocketbase and add the executable to your PATH environment variable.
 - Run the main program.
