@@ -1,73 +1,109 @@
-# Seismehub Project
+## عن المشروع
 
-## Overview
-This project consists of both backend and frontend components. The backend is implemented using Go and Pocketbase, which has an embedded SQLite database. The frontend is a web-based application.
+هو منصة مركزية تهدف إلى تسريع وتبسيط المساعدات لضحايا الزلزال في المغرب
+مهمتنا ثنائية الهدف: تبسيط التبرعات العاجلة من خلال توجيه الجهود حيث يكون لها الأثر الأكبر، وتكوين جسر بين المتبرعين الراغبين والعاملين في الميدان. من خلال مشاركة المعلومات بدعم التكنولوجيا، نهدف إلى جعل كل مساهمة مهمة في حالات الأزمات.
 
-## Pre-requisites
+## إخلاء المسؤولية
+
+على الرغم من سعينا لتوفير بيانات دقيقة وفي الوقت المناسب، إلا أنها مستمدة من مساهمين ومتطوعين متعددين؛ لذلك، لا يمكننا ضمان اكتمالها أو موثوقيتها. تُعتبر المنصة لأغراض معلوماتية فقط. يُرجى التحقق المستقل من أي معلومات حرجة واتباع توجيهات السلطات المحلية في حالات الطوارئ. من خلال استخدام هذه المنصة، توافق على هذا الإخلاء.
+
+## What You Need
 
 ### Backend
-- Go programming language
-- Pocketbase executable
-# Frontend
-- Nodejs
-- NPM
-- ReactJS
-- Typescript
-- Tailwind
 
-## Getting Started
+- **Go Programming Language**: Grab it from the [official site](https://go.dev/).
+- **Pocketbase**: Download the executable and make it accessible in your PATH.
 
-### Clone the Repository
-First, clone the repository to your local machine:
+### Frontend
 
-````
+- **Node.js**: Download from [here](https://nodejs.org/).
+- **NPM**: Comes with Node.js. Verify by running `npm -v`.
+- **React.js, TypeScript, and Tailwind CSS**: These will be installed next.
+
+## Get Started
+
+### Step 1: Get the Code
+
+Clone this repo to kick things off:
+
+```bash
 git clone https://github.com/yourusername/seismehub.git
-````
+```
 
-### Setting Up the Frontend
-Navigate to the frontend directory and install the required packages.
+### Step 2: Frontend Setup
 
-````
+Jump into the frontend directory (`website`) and install the required packages:
+
+```bash
+cd seismehub/website
 npm install
-````
+```
 
-### Setting Up the Backend
+To get the frontend running:
 
-- Download and install Go from the [Official Go Website](https://go.dev/)
-- Install dependencies (if any).
-- Download Pocketbase and add the executable to your PATH environment variable.
-- Run the main program.
+```bash
+npm run dev
+```
 
-There's no need to install any databases as Pocketbase uses an internal SQLite database.
+### Step 3: Backend Setup
 
-### Running Migrations
-Run the following command to migrate the database.
+Head back and get into the backend directory:
 
-````
+- Verify Go is installed by running `go version`.
+- Download Pocketbase and add it to your PATH.
+
+**Note**: Pocketbase has SQLite built-in, so no separate database setup is needed.
+
+```bash
+cd seismehub/backend
+```
+
+### Step 4: Migrate the Database
+
+Set up the database with:
+
+```bash
 pocketbase migrate
-````
+```
 
-### Build the Backend Project
-Run the following command to build the backend.
+### Step 5: Fire Up the Backend
 
-````
+Compile the Go code:
+
+```bash
 go build
-````
+```
 
-### Run the Backend
-To run the backend server, execute:
+Now, start the backend:
 
-````
+```bash
 ./seismehub-be serve
-````
+```
 
-You will see output similar to the following, indicating that the server has started:
+You'll know you're good when you see:
 
-````
+```text
 Server started at http://127.0.0.1:8090
 ├─ REST API: http://127.0.0.1:8090/api/
 └─ Admin UI: http://127.0.0.1:8090/_/
-````
+```
 
-## Contributions
-Please feel free to submit enhancement or features you think are important or even better join the Seismehub conversation and/or contact Abdelmalek Elmellouki to get a the urgent tasks to start on.
+## 💙 Contributing
+
+We're all ears for community contributions—whether it's a quick typo fix or an entirely new feature. You don't need to be an expert to make an impact. Here's how to contribute:
+
+1. **Fork and Clone**: Secure a copy of the repo on your account and machine.
+
+2. **Install Dependencies**: Follow the guidelines in `readme.md`.
+
+3. **Create a New Branch**: Isolate your changes in a dedicated branch.
+
+4. **Make Changes**: Roll out your code and accompanying tests.
+
+5. **Run Linting**: Keep an eye out for code style or linting issues.
+
+6. **Commit and Push**: Sync your changes to your online fork.
+
+7. **Submit a Pull Request**: Initiate a PR from your fork to the main repo.
+
+Got questions? Feel free to drop them in the issues section.
