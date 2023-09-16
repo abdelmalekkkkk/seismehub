@@ -12,6 +12,7 @@
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
+    "@radix-ui/themes": "^1.1.2",
     "@types/leaflet.markercluster": "^1.5.2",
     "flowbite": "^1.8.1",
     "flowbite-react": "^0.6.0",
