@@ -17,7 +17,7 @@ func main() {
 	go func() {
 		fmt.Println("Waiting to start")
 		time.Sleep(10 * time.Second)
-		file, err := os.Open("villages.csv")
+		file, err := os.Open("../villages.csv")
 
 		if err != nil {
 			panic(err)
