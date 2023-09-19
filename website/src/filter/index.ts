@@ -6,18 +6,27 @@ type FilterState = {
     menage: [number,number];
     altitude: [number,number];
     needs: NeedTypeKey[];
-    commune: string;
-    region: string;
-    province: string;
+    commune?: string;
+    region?: string;
+    province?: string;
     accessbile_road?: boolean;
     water_quality: string;
 };
 
 type SearchParams = {
+    commune?: string;
+    region?: string;
+    province?: string;
     needs_keys?: NeedTypeKey[];
     population: {
         between: [number, number]
-    }
+    };
+    menage: {
+        between: [number, number]
+    };
+    altitude: {
+        between: [number, number]
+    };
 }
 
 class Filter {
@@ -36,8 +45,15 @@ class Filter {
                 region: 'string',
                 needs_keys: 'string[]',
                 population: 'number',
+                menage: 'number',
+                altitude: 'number',
                 accessuible_road: 'boolean',
                 water_quality: 'string',
+            },
+            components: {
+                tokenizer: {
+                    stemming: false,
+                }
             }
         });
 
@@ -51,15 +67,37 @@ class Filter {
             return [];
         }
 
+        console.log(state);
+
         const where: SearchParams = {
             population: {
                 between: state.population,
-            }
+            },
+            menage: {
+                between: state.menage,
+            },
+            altitude: {
+                between: state.altitude,
+            },
         };
 
         if (state.needs.length > 0) {
             where.needs_keys = state.needs
         }
+
+        if (state.commune != "") {
+            where.commune = state.commune
+        }
+
+        if (state.region != "") {
+            where.region = state.region
+        }
+
+        if (state.province != "") {
+            where.province = state.province
+        }
+
+        console.log("wehre", where)
 
         const results = await search(this.index, {
             term: state.term,

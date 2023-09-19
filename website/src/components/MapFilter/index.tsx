@@ -22,6 +22,7 @@ type MapFilterProps = {
 const MapFilter = ({ applyFilters }: MapFilterProps) => {
     const populationRef = createRef<HTMLSpanElement>();
     const menageRef = createRef<HTMLSpanElement>();
+    const altitudeRef = createRef<HTMLSpanElement>();
 
     const needTypes = useNeedsTypes();
     const filter = useMapFilter();
@@ -52,6 +53,13 @@ const MapFilter = ({ applyFilters }: MapFilterProps) => {
         setFilterData((filterData) => ({
             ...filterData,
             menage: e.value as [number, number],
+        }));
+    };
+
+    const changeAltitude = (e: SliderChangeEvent) => {
+        setFilterData((filterData) => ({
+            ...filterData,
+            altitude: e.value as [number, number],
         }));
     };
 
@@ -204,6 +212,27 @@ const MapFilter = ({ applyFilters }: MapFilterProps) => {
                             completeMethod={e => searchField("province", e)}
                             dropdown
                             forceSelection
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="text-sm font-medium">
+                        Altitude
+                        <span
+                            className="text-sm text-gray-500 ml-1"
+                            ref={altitudeRef}
+                        >
+                            ({filterData.altitude[0]} -{" "}
+                            {filterData.altitude[1]})
+                        </span>
+                    </label>
+                    <div className="flex flex-col gap-2 mt-2">
+                        <Slider
+                            max={DefaultFilterState.altitude[1]}
+                            onChange={changeAltitude}
+                            min={0}
+                            value={filterData.altitude}
+                            range
                         />
                     </div>
                 </div>
