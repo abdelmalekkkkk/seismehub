@@ -1,0 +1,19 @@
+.p-datatable .p-datatable-thead > tr > th {
+    @apply text-sm bg-white !important;
+}
+
+.p-datatable.p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead {
+    @apply bg-white !important;
+}
+
+.p-datatable .p-sortable-column .p-sortable-column-icon {
+    @apply w-3;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+    @apply text-sm py-3  !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+    @apply border-b-2 !important;
+}

@@ -12,23 +12,19 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber, InputNumberChangeEvent } from "primereact/inputnumber";
 import { useAddNeed } from "../../hooks/needs";
 import { toast } from "react-toastify";
-import { InputText } from "primereact/inputtext";
-import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
-import { Calendar } from "primereact/calendar";
 
 type AddNeedProps = {
     village?: Village;
 };
 
-type AddConvoyData = {
+type AddNeedData = {
     village_name?: VillageName;
-    needs: NeedTypeKey[];
-    ngo_name: string;
-    details: string;
-    date: string;
+    need?: NeedType;
+    details?: string;
+    quantity?: number;
 };
 
-const AddConvoy = ({ village }: AddNeedProps) => {
+const AddNeed = ({ village }: AddNeedProps) => {
     const currentVillageName =
         village == undefined
             ? undefined
@@ -39,12 +35,8 @@ const AddConvoy = ({ village }: AddNeedProps) => {
 
     const [open, setOpen] = useState(false);
 
-    const [data, setData] = useState<AddConvoyData>({
+    const [data, setData] = useState<AddNeedData>({
         village_name: currentVillageName,
-        ngo_name: "",
-        needs: [],
-        details: "",
-        date: "",
     });
 
     const needsTypes = useNeedsTypes();
@@ -58,37 +50,37 @@ const AddConvoy = ({ village }: AddNeedProps) => {
 
     const handleOnSubmit = (e: FormEvent) => {
         e.preventDefault()
-        // mutate({
-        //     village: data.village_name?.id ?? "",
-        //     need_type: data.need?.id ?? "",
-        //     details: data.details ?? "",
-        //     quantity: data.quantity ?? 0,
-        // })
+        mutate({
+            village: data.village_name?.id ?? "",
+            need_type: data.need?.id ?? "",
+            details: data.details ?? "",
+            quantity: data.quantity ?? 0,
+        })
     }
 
     useEffect(() => {
         if (isSuccess) {
-            toast.success("Votre engagement a été enregistré avec succès.")
+            toast.success("Le besoin a été déclaré avec succès.")
             // Close the modal
-            // setOpen(false);
-            // // Reset form
-            // setData({
-            //     village_name: currentVillageName,
-            // })
-            // // Update the village's needs
-            // if (data.village_name?.id == undefined || data.need == undefined) {
-            //     return;
-            // }
-            // addNeedToVillage(data.village_name.id, {
-            //     type: data.need.key,
-            //     details: newNeed.details,
-            //     name: data.need.name,
-            //     created: newNeed.created,
-            //     id: newNeed.id,
-            //     quantity: newNeed.quantity,
-            //     verified: newNeed.verified,
-            //     urgency: newNeed.urgency,
-            // });
+            setOpen(false);
+            // Reset form
+            setData({
+                village_name: currentVillageName,
+            })
+            // Update the village's needs
+            if (data.village_name?.id == undefined || data.need == undefined) {
+                return;
+            }
+            addNeedToVillage(data.village_name.id, {
+                type: data.need.key,
+                details: newNeed.details,
+                name: data.need.name,
+                created: newNeed.created,
+                id: newNeed.id,
+                quantity: newNeed.quantity,
+                verified: newNeed.verified,
+                urgency: newNeed.urgency,
+            });
         }
     }, [isSuccess]);
 
@@ -104,18 +96,11 @@ const AddConvoy = ({ village }: AddNeedProps) => {
         });
     };
 
-    const changeNeeds = (e: CheckboxChangeEvent) => {
-        if (e.checked) {
-            setData(data => ({
-                ...data,
-                needs: [...data.needs, e.value.key]
-            }));
-        } else {
-            setData(data => ({
-                ...data,
-                needs: data.needs.filter(needType => needType != e.value.key)
-            }));
-        }
+    const changeNeed = (event: RadioButtonChangeEvent) => {
+        setData({
+            ...data,
+            need: event.value,
+        })
     }
 
     const changeDetails = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -125,24 +110,30 @@ const AddConvoy = ({ village }: AddNeedProps) => {
         })
     }
 
+    const changeQuantity = (event: InputNumberChangeEvent) => {
+        setData({
+            ...data,
+            quantity: event.value ?? undefined,
+        })
+    }
 
     return (
         <>
             <Button
                 size="small"
-                severity="success"
+                severity="danger"
                 onClick={() => setOpen(true)}
             >
-                Engagez-vous
+                Déclarer un besoin
             </Button>
             <Dialog
                 visible={open}
                 onHide={() => setOpen(false)}
-                header="Engagez-vous"
+                header="Déclarer un besoin"
                 headerClassName="text-sm"
                 dismissableMask={true}
                 style={{
-                    width: "600px",
+                    width: "500px",
                 }}
             >
                 <p className="text-sm text-gray-500">
@@ -169,37 +160,28 @@ const AddConvoy = ({ village }: AddNeedProps) => {
                         />
                     </div>
                     <div className="grid grid-cols-1 gap-2">
-                        <label
-                            className="text-sm font-bold"
-                        >
-                            Nom de l'association
-                        </label>
-                        <InputText className="p-inputtext-sm" />
-                    </div>
-                    <div className="grid grid-cols-1 gap-2">
                         <label className="text-sm font-bold">
                             Type de besoin
                         </label>
                         <div className="grid gap-1">
                             {needsTypes.map(need => <div key={need.key} className="flex items-center">
-                                <Checkbox inputId={`need_type-${need.key}`} checked={data.needs.find(needType => needType == need.key) != undefined} onChange={changeNeeds} value={need} />
-                                <label className="text-sm ml-2 cursor-pointer" htmlFor={`need_type-${need.key}`}>{need.name}</label>
+                                <RadioButton inputId={`need_type-${need.key}`} checked={data.need?.key == need.key} onChange={changeNeed} value={need} />
+                                <label className="text-sm ml-2" htmlFor={`need_type-${need.key}`}>{need.name}</label>
                             </div>)}
                         </div>
                     </div>
                     <div className="grid grid-cols-1 gap-2">
                         <label htmlFor={`need_description`} className="text-sm font-bold">
-                            Date d'engagement
-                        </label>
-                        <Calendar inputClassName="p-inputtext-sm" panelStyle={{minWidth: "auto", width: "auto"}}/>
-                    </div>
-                    <div className="grid grid-cols-1 gap-2">
-                        <label htmlFor={`need_description`} className="text-sm font-bold">
-                            Plus de détails
+                            Détails
                         </label>
                         <InputTextarea id="need_description" className="text-sm p-inputtext-sm" onChange={changeDetails} value={data.details} />
                     </div>
-                   
+                    <div className="grid grid-cols-1 gap-2">
+                        <label htmlFor={`need_description`} className="text-sm font-bold">
+                            Quantité
+                        </label>
+                        <InputNumber id="need_description" className="text-sm w-2 p-inputtext-sm" onChange={changeQuantity} value={data.quantity} />
+                    </div>
                     <div className="flex justify-end">
                         <Button size="small" disabled={isLoading}>Envoyer</Button>
                     </div>
@@ -209,4 +191,4 @@ const AddConvoy = ({ village }: AddNeedProps) => {
     );
 };
 
-export default AddConvoy;
+export default AddNeed;

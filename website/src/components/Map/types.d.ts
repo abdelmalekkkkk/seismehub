@@ -1,0 +1,3 @@
+type MapFilter = {
+    population: PopulationOption;
+}

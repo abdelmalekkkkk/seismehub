@@ -1,13 +1,10 @@
 import Map from "../../components/Map";
-import { MapProvider } from "../../contexts/MapContext";
+import Hero from "../../sections/Hero";
 
 const Home = () => {
-    return <div>
-        <div className=" h-96 w-2"></div>
-        <MapProvider>
+    return <div className="">
+            <Hero />
             <Map />
-        </MapProvider>
-        <div className=" h-96 w-2"></div>
     </div>
 }
 

@@ -1,123 +1,246 @@
-import { Button, Checkbox, Label, Radio, RangeSlider, TextInput } from "flowbite-react";
-import Filter from "../../filter";
-import { createRef } from "react";
-
-const needsOptions: NeedOption[] = [
-    {id: "", label: "Tout"},
-    {id: "", label:"Extraction des victimes sous les décombes"},
-    {id: "", label:"Nourriture"},
-    {id: "", label:"Médicaments"},
-    {id: "", label:"Couvertures, vêtements, ustensiles..."},
-    {id: "", label:"Transport"},
-    {id: "", label:"Soutien psychologique"},
-    {id: "", label:"Libération d'accès routiers"},
-    {id: "", label:"Réhabilitation Eau"},
-    {id: "", label:"Réhabilitation Electricité"},
-    {id: "", label:"Réhabilitation Réseau Mobile"},
-    {id: "", label:"Réhabilitation Asssinissement"},
-];
-
-const helpedOptions: HelpedOption[] = [
-    {id: "", label: "Non"},
-    {id: "", label: "Oui"},
-]
-
-const levelsOptions: LevelOption[] = [
-    {
-        id: "",
-        label: "Très sévère",
-    },
-    {
-        id: "",
-        label: "Assez dégradée",
-    },
-    {
-        id: "",
-        label: "Modérée",
-    },
-];
+import "./index.css";
+import { Button } from "primereact/button";
+import Filter, { FilterState } from "../../filter";
+import { createRef, useState } from "react";
+import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
+import { InputText } from "primereact/inputtext";
+import { Slider, SliderChangeEvent } from "primereact/slider";
+import { useMapFilter, useNeedsTypes } from "../../contexts/MapContext";
+import { DefaultFilterState } from "../../contexts/MapContext";
+import {
+    AutoComplete,
+    AutoCompleteChangeEvent,
+    AutoCompleteCompleteEvent,
+} from "primereact/autocomplete";
 
 type MapFilterProps = {
     filter: Filter;
-    applyFilters: () => void;
-}
+    applyFilters: (state: FilterState) => void;
+};
 
-const MapFilter = ({ filter, applyFilters }: MapFilterProps) => {
+
+const MapFilter = ({ applyFilters }: MapFilterProps) => {
     const populationRef = createRef<HTMLSpanElement>();
+    const menageRef = createRef<HTMLSpanElement>();
+
+    const needTypes = useNeedsTypes();
+    const filter = useMapFilter();
+
+    const [filterData, setFilterData] =
+        useState<FilterState>(DefaultFilterState);
+    const [communeSuggestions, setCommuneSuggestions] = useState<string[]>([]);
+    const [provinceSuggestions, setProvinceSuggestions] = useState<string[]>(
+        []
+    );
+    const [regionSuggestions, setRegionSuggestions] = useState<string[]>([]);
 
     const changeTerm = (e: React.ChangeEvent<HTMLInputElement>) => {
-        filter.term = e.target.value;
-    }
+        setFilterData((filterData) => ({
+            ...filterData,
+            term: e.target.value,
+        }));
+    };
 
-    const changePopulation = (e: React.ChangeEvent<HTMLInputElement>) => {
-        filter.population = parseInt(e.target.value);
-        if (populationRef.current != undefined) {
-            populationRef.current.innerText = e.target.value;
+    const changePopulation = (e: SliderChangeEvent) => {
+        setFilterData((filterData) => ({
+            ...filterData,
+            population: e.value as [number, number],
+        }));
+    };
+
+    const changeMenage = (e: SliderChangeEvent) => {
+        setFilterData((filterData) => ({
+            ...filterData,
+            menage: e.value as [number, number],
+        }));
+    };
+
+    const changeNeeds = (e: CheckboxChangeEvent) => {
+        if (e.checked) {
+            setFilterData((filterData) => ({
+                ...filterData,
+                needs: [...filterData.needs, e.value.key],
+            }));
+        } else {
+            setFilterData((filterData) => ({
+                ...filterData,
+                needs: filterData.needs.filter(
+                    (needType) => needType != e.value.key
+                ),
+            }));
         }
-    }
+    };
 
-    return <div className="flex flex-col min-h-0 max-h-full">
-        <div className="flex justify-between px-4 mt-4 items-center">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">Recherche</h1>
-            <Button size="xs" onClick={() => applyFilters()}>Appliquer</Button>
-        </div>
-        <div className="px-4 mt-4 py-4 border-t border-gray-200 flex-grow flex flex-col gap-3 max-h-full overflow-y-scroll">
-            <div>
-                <Label className="text-sm">
-                    Nom du village
-                </Label>
-                <TextInput
-                className="mt-2"
-                    id="village_name"
-                    placeholder="Entrez le nom"
-                    onChange={changeTerm}
-                />
-            </div>
-            <div>
-                <Label className="text-sm">
-                    Population
-                    <span className="text-sm text-gray-500 ml-1" ref={populationRef}>(500)</span>
-                </Label>
-                <div className="flex flex-col gap-2 mt-2">
-                    <RangeSlider max={5000} onChange={changePopulation} defaultValue={500} />
-                </div>
-            </div>
-            <div>
-                <Label className="text-sm">
-                    Aide deja recu
-                </Label>
-                <div className="flex flex-col gap-2 mt-2">
-                    {helpedOptions.map((option, index) => <div className="flex items-center gap-3" key={index}>
-                        <Radio id={`helped-option-${index}`} name="helped" />
-                        <Label htmlFor={`helped-option-${index}`} value={option.label} />
-                    </div>)}
-                </div>
-            </div>
-            <div>
-                <Label className="text-sm">
-                    Type de besoin
-                </Label>
-                <div className="flex flex-col gap-2 mt-2">
-                    {needsOptions.map((option, index) => <div className="flex items-center gap-3" key={index}>
-                        <Checkbox id={`need-option-${index}`} name="need" />
-                        <Label htmlFor={`need-option-${index}`} value={option.label} />
-                    </div>)}
-                </div>
-            </div>
-            <div>
-                <Label className="text-sm">
-                    Severité
-                </Label>
-                <div className="flex flex-col gap-2 mt-2">
-                    {levelsOptions.map((option, index) => <div className="flex items-center gap-3" key={index}>
-                        <Checkbox id={`level-option-${index}`} name="level" />
-                        <Label htmlFor={`level-option-${index}`} value={option.label} />
-                    </div>)}
-                </div>
-            </div>
-        </div>
+    const changeField = (
+        field: keyof FilterState,
+        e: AutoCompleteChangeEvent
+    ) => {
+        setFilterData((filterData) => ({
+            ...filterData,
+            [field]: e.value,
+        }));
+    };
 
-    </div>
-}
+    const searchField = async (
+        field: keyof FilterState,
+        event: AutoCompleteCompleteEvent
+    ) => {
+        const results = await filter.suggestField(field, event.query);
+        switch (field) {
+            case "commune":
+                setCommuneSuggestions(results);
+                break
+            case "province":
+                setProvinceSuggestions(results);
+                break
+            case "region":
+                setRegionSuggestions(results);
+                break
+        }
+    };
+
+    return (
+        <div className="flex flex-col min-h-0 max-h-full">
+            <div className="flex justify-between px-4 mt-4 items-center">
+                <h1 className="text-2xl font-medium tracking-tight text-gray-900">
+                    Recherche
+                </h1>
+                <Button size="small" onClick={() => applyFilters(filterData)}>
+                    Appliquer
+                </Button>
+            </div>
+            <div className="px-4 mt-4 py-4 border-t border-gray-200 flex-grow flex flex-col gap-3 max-h-full overflow-y-scroll">
+                <div>
+                    <label className="text-sm font-medium">
+                        Nom du village
+                    </label>
+                    <InputText
+                        className=" p-inputtext-sm w-full !mt-2"
+                        id="village_name"
+                        placeholder="Entrez le nom"
+                        onChange={changeTerm}
+                    />
+                </div>
+                <div>
+                    <label className="text-sm font-medium">
+                        Population
+                        <span
+                            className="text-sm text-gray-500 ml-1"
+                            ref={populationRef}
+                        >
+                            ({filterData.population[0]} -{" "}
+                            {filterData.population[1]})
+                        </span>
+                    </label>
+                    <div className="flex flex-col gap-2 mt-2">
+                        <Slider
+                            max={DefaultFilterState.population[1]}
+                            onChange={changePopulation}
+                            min={0}
+                            value={filterData.population}
+                            range
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="text-sm font-medium">
+                        Meange
+                        <span
+                            className="text-sm text-gray-500 ml-1"
+                            ref={menageRef}
+                        >
+                            ({filterData.menage[0]} - {filterData.menage[1]})
+                        </span>
+                    </label>
+                    <div className="flex flex-col gap-2 mt-2">
+                        <Slider
+                            max={DefaultFilterState.menage[1]}
+                            onChange={changeMenage}
+                            min={0}
+                            value={filterData.menage}
+                            range
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="text-sm font-medium">Commune</label>
+                    <div className="flex flex-col gap-2 mt-2">
+                        <AutoComplete
+                            className="w-full"
+                            inputClassName="p-inputtext-sm w-full text-sm"
+                            value={filterData.commune}
+                            suggestions={communeSuggestions}
+                            onChange={e => changeField("commune", e)}
+                            completeMethod={e => searchField("commune", e)}
+                            dropdown
+                            forceSelection
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="text-sm font-medium">Région</label>
+                    <div className="flex flex-col gap-2 mt-2">
+                        <AutoComplete
+                            className="w-full"
+                            inputClassName="p-inputtext-sm w-full text-sm"
+                            value={filterData.region}
+                            suggestions={regionSuggestions}
+                            onChange={e => changeField("region", e)}
+                            completeMethod={e => searchField("region", e)}
+                            dropdown
+                            forceSelection
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="text-sm font-medium">Province</label>
+                    <div className="flex flex-col gap-2 mt-2">
+                        <AutoComplete
+                            className="w-full"
+                            inputClassName="p-inputtext-sm w-full text-sm !py-2"
+                            value={filterData.province}
+                            suggestions={provinceSuggestions}
+                            onChange={e => changeField("province", e)}
+                            completeMethod={e => searchField("province", e)}
+                            dropdown
+                            forceSelection
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="text-sm font-medium">
+                        Type de besoin
+                    </label>
+                    <div className="flex flex-col gap-2 mt-2">
+                        {needTypes.map((option, index) => (
+                            <div
+                                className="flex items-center gap-3"
+                                key={option.key}
+                            >
+                                <Checkbox
+                                    inputId={`need-option-${index}`}
+                                    onChange={changeNeeds}
+                                    name="need"
+                                    value={option}
+                                    checked={
+                                        filterData.needs.find(
+                                            (needType) => needType == option.key
+                                        ) != undefined
+                                    }
+                                />
+                                <label
+                                    className="text-sm cursor-pointer"
+                                    htmlFor={`need-option-${index}`}
+                                >
+                                    {option.name}
+                                </label>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default MapFilter;

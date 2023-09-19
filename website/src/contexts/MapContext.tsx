@@ -1,54 +1,87 @@
-import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Village, useGetVillages } from "../hooks/villages";
-import { Map } from "leaflet";
-import Filter from "../filter";
+import { PropsWithChildren, RefObject, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useGetVillages } from "../hooks/villages";
+import { Map as LeafletMap } from "leaflet";
+import Filter, { FilterState } from "../filter";
+import { DataTable } from "primereact/datatable";
+import { useGetNeedsTypes } from "../hooks/needs";
 
 type MapContext = {
     villages: Village[];
+    villagesMap: Map<string, Village>;
     selectedVillage?: Village;
     selectVillage: (village: Village) => void;
     closeVillage: () => void;
-    setMap: (map: Map) => void;
-    applyFilters: () => void;
+    setMap: (map: LeafletMap) => void;
+    setTable: (dataTable: RefObject<DataTable<Village[]> | undefined>) => void;
+    applyFilters: (state: FilterState) => void;
     filter: Filter;
+    needsTypes: NeedType[];
+    addNeedToVillage: (villageID: string, need: Need) => void;
 };
 
 const MapContext = createContext<MapContext|null>(null);
 
-const MapProvider = ({ children }: PropsWithChildren) => {
-    const { data } = useGetVillages();
-    const [map, _setMap] = useState<Map>();
-    const [selectedVillage, setSelectedVillage] = useState<Village|undefined>();
+const DefaultFilterState: FilterState = {
+    term: "",
+    population: [0, 6000],
+    menage: [0, 2000],
+    altitude: [0, 2500],
+    needs: [],
+    province: "",
+    region: "",
+    commune: "",
+    water_quality: "",
+    accessbile_road: undefined,
+}
 
-    const [filteredVillages, setFilteredVillages] = useState<Village[]>(data ?? []);
-   
-    const filter = useMemo(() => {
-        return new Filter({
-            term: "",
-            population: 500,
-            helped: {
-                label: "",
-                id: "",
-            },
-            needs: [],
-            level: {
-                label: "",
-                id: "",
-            },
-            villages: data ?? [],
-        });
-    }, [data])
+const buildVillagesMap = (villages: Village[]): Map<string, Village> => {
+    const map = new Map();
 
-    useEffect(() => {
-        _applyFilters();
-    }, [data]);
-
-    const _applyFilters = () => {
-        setFilteredVillages(filter.apply())
-        console.log(filter);
+    for (let i = 0; i < villages.length; i++) {
+        map.set(villages[i].id, villages[i]);
     }
 
-    const applyFilters = useCallback(_applyFilters, [filter]);
+    return map;
+}
+
+const MapProvider = ({ children }: PropsWithChildren) => {
+    const { data } = useGetVillages();
+    const { data: needsTypes } = useGetNeedsTypes();
+    const [map, _setMap] = useState<LeafletMap>();
+    const table = useRef<DataTable<Village[]>>();
+    const [selectedVillage, setSelectedVillage] = useState<Village|undefined>();
+    const [filteredVillages, setFilteredVillages] = useState<Village[]>(data ?? []);
+    const [villagesMap, setVillagesMap] = useState<Map<string, Village>>(new Map());
+
+    const lastState = useRef<FilterState>(DefaultFilterState)
+    
+    const filter = useMemo(() => {
+        const filter = new Filter();
+        filter.setup(data ?? []).then(() => {
+            filter.search(DefaultFilterState).then(villages => {
+                setFilteredVillages(villages);
+            })
+        });
+        return filter;
+    }, [data]);
+
+    console.log("context state change")
+
+    useEffect(() => {
+        const newMap = buildVillagesMap(data ?? []);
+        setVillagesMap(newMap);
+    }, [data]);
+
+    const _applyFilters = async (state: FilterState) => {
+        lastState.current = state;
+        const results = await filter.search(state);
+        setFilteredVillages(results);
+        map?.flyTo([31.1, -8.48], 8, {
+            duration: 0.5,
+        });
+    }
+
+    const applyFilters = useCallback(_applyFilters, [filter,map]);
 
     const _selectVillage = (village: Village) => {
         setSelectedVillage(currentVillage => {
@@ -77,20 +110,44 @@ const MapProvider = ({ children }: PropsWithChildren) => {
 
     const closeVillage = useCallback(_closeVillage, []);
 
-    const setMapWrapper = (map: Map) => {
-        _setMap(map);
+    const setMap = useCallback(_setMap, [_setMap]);
+
+    const _setTable = (dataTable: RefObject<DataTable<Village[]> | undefined>) => {
+        if (dataTable.current != null) {
+            table.current = dataTable.current;
+        }
     }
 
-    const setMap = useCallback(setMapWrapper, []);
+    const setTable = useCallback(_setTable, [_setTable]);
+
+    const _addNeedToVillage = (villageID: string, need: Need) => {
+        const newMap = new Map(villagesMap);
+        const village = newMap.get(villageID);
+        
+        if (village == undefined) {
+            return;
+        }
+
+        village.needs.push(need);
+
+        newMap.set(villageID, village);
+        setVillagesMap(newMap);
+    }
+
+    const addNeedToVillage = useCallback(_addNeedToVillage, [_addNeedToVillage]);
 
     return <MapContext.Provider value={{
         selectedVillage,
         selectVillage,
         closeVillage,
         setMap,
+        setTable,
         applyFilters,
+        villagesMap,
+        addNeedToVillage,
         villages: filteredVillages,
         filter,
+        needsTypes: needsTypes ?? [],
     }}>
         {children}
     </MapContext.Provider>
@@ -146,6 +203,17 @@ const useSetMap = () => {
     return context.setMap;
 }
 
+const useSetTable = () => {
+    const context = useContext(MapContext);
+
+    if (context == null) {
+        throw new Error("the map provider is not initialized");
+    }
+
+    return context.setTable;
+}
+
+
 const useApplyFilters = () => {
     const context = useContext(MapContext);
 
@@ -166,6 +234,36 @@ const useMapFilter = () => {
     return context.filter;
 }
 
+const useNeedsTypes = () => {
+    const context = useContext(MapContext);
+
+    if (context == null) {
+        throw new Error("the map provider is not initialized");
+    }
+
+    return context.needsTypes;
+}
+
+const useGetVillage = (id: string): Village | undefined => {
+    const context = useContext(MapContext);
+
+    if (context == null) {
+        throw new Error("the map provider is not initialized");
+    }
+
+    return context.villagesMap.get(id);
+}
+
+const useAddNeedToVillage = () => {
+    const context = useContext(MapContext);
+
+    if (context == null) {
+        throw new Error("the map provider is not initialized");
+    }
+
+    return context.addNeedToVillage;
+}
+
 export {
     MapProvider,
     useSelectedVillage,
@@ -175,4 +273,9 @@ export {
     useSetMap,
     useApplyFilters,
     useMapFilter,
+    useSetTable,
+    useNeedsTypes,
+    useGetVillage,
+    useAddNeedToVillage,
+    DefaultFilterState
 }

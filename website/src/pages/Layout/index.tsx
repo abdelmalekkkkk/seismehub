@@ -1,6 +1,8 @@
 import { Outlet } from "react-router-dom";
 import { ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
+import Navbar from "../../sections/Navbar";
+import Footer from "../../sections/Footer";
 
 const Layout = () => {
     return (
@@ -11,18 +13,9 @@ const Layout = () => {
                 transition={Slide}
                 hideProgressBar={true}
             />
-            {/* <Box px="9" py="3">
-            <Flex align="center">
-                <img src={SeismeHub} width={50} />
-                <Text size="5" weight="bold">SeismeHub</Text>
-                <Flex grow="1" justify="end" gap="3">
-                    <AddConvoy />
-                    <AddVillage />
-                </Flex>
-            </Flex>
-        </Box> */}
-            
+            <Navbar />
             <Outlet />
+            <Footer />
         </div>
     );
 };

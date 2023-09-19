@@ -1,5 +1,4 @@
 import { MapContainer, TileLayer } from "react-leaflet";
-import { Village } from "../../hooks/villages";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { memo } from "react";
 import MapVillages from "../MapVillages";
@@ -22,7 +21,7 @@ const MapComponent = ({ villages, onSelect, setMap }: MapComponentProps) => {
             attributionControl={false}
             ref={setMap}
         >
-            <TileLayer url="https://api.mapbox.com/styles/v1/abdelmalekkkkk/clmfxe08901hq01r78isa90b0/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYWJkZWxtYWxla2tra2siLCJhIjoiY2tyanR6OXV4MHZ4eTJvcGVyMWRqZDYwMiJ9.YfBWrfxMeRFkTq3EiJR7Hg" />
+            <TileLayer url="http://{s}.google.com/vt?lyrs=s&x={x}&y={y}&z={z}"  subdomains={['mt0','mt1','mt2','mt3']} maxZoom={20} />
 
             <MarkerClusterGroup
                 chunkedLoading
