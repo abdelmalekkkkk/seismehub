@@ -16,6 +16,7 @@
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
+    "@orama/orama": "^1.2.5",
     "@types/flexsearch": "0.7.2",
     "@types/leaflet.markercluster": "^1.5.2",
     "dayjs": "^1.11.9",

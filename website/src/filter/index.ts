@@ -29,8 +29,21 @@ type SearchParams = {
     };
 }
 
+type Schema = {
+    readonly name: "string";
+    readonly commune: "string";
+    readonly province: "string";
+    readonly region: "string";
+    readonly needs_keys: "string[]";
+    readonly population: "number";
+    readonly menage: "number";
+    readonly altitude: "number";
+    readonly accessuible_road: "boolean";
+    readonly water_quality: "string";
+};
+
 class Filter {
-    index?: Orama;
+    index?: Orama<Schema>;
 
     constructor() {
         
