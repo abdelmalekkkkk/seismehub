@@ -1,17 +1,13 @@
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { useAddNeedToVillage, useMapFilter, useNeedsTypes } from "../../contexts/MapContext";
+import { ChangeEvent, FormEvent, useState } from "react";
+import { useMapFilter, useNeedsTypes } from "../../contexts/MapContext";
 import {
     AutoComplete,
     AutoCompleteChangeEvent,
     AutoCompleteCompleteEvent,
 } from "primereact/autocomplete";
-import { RadioButton, RadioButtonChangeEvent } from "primereact/radiobutton";
 import { InputTextarea } from "primereact/inputtextarea";
-import { InputNumber, InputNumberChangeEvent } from "primereact/inputnumber";
-import { useAddNeed } from "../../hooks/needs";
-import { toast } from "react-toastify";
 import { InputText } from "primereact/inputtext";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
 import { Calendar } from "primereact/calendar";
@@ -53,8 +49,8 @@ const AddConvoy = ({ village }: AddNeedProps) => {
 
     const [items, setItems] = useState<VillageName[]>([]);
 
-    const addNeedToVillage = useAddNeedToVillage();
-    const { mutate, isLoading, isSuccess, data: newNeed } = useAddNeed();
+    // const addNeedToVillage = useAddNeedToVillage();
+    // const { mutate, isLoading, isSuccess, data: newNeed } = useAddNeed();
 
     const handleOnSubmit = (e: FormEvent) => {
         e.preventDefault()
@@ -66,31 +62,31 @@ const AddConvoy = ({ village }: AddNeedProps) => {
         // })
     }
 
-    useEffect(() => {
-        if (isSuccess) {
-            toast.success("Votre engagement a été enregistré avec succès.")
-            // Close the modal
-            // setOpen(false);
-            // // Reset form
-            // setData({
-            //     village_name: currentVillageName,
-            // })
-            // // Update the village's needs
-            // if (data.village_name?.id == undefined || data.need == undefined) {
-            //     return;
-            // }
-            // addNeedToVillage(data.village_name.id, {
-            //     type: data.need.key,
-            //     details: newNeed.details,
-            //     name: data.need.name,
-            //     created: newNeed.created,
-            //     id: newNeed.id,
-            //     quantity: newNeed.quantity,
-            //     verified: newNeed.verified,
-            //     urgency: newNeed.urgency,
-            // });
-        }
-    }, [isSuccess]);
+    // useEffect(() => {
+    //     if (isSuccess) {
+    //         toast.success("Votre engagement a été enregistré avec succès.")
+    //         // Close the modal
+    //         // setOpen(false);
+    //         // // Reset form
+    //         // setData({
+    //         //     village_name: currentVillageName,
+    //         // })
+    //         // // Update the village's needs
+    //         // if (data.village_name?.id == undefined || data.need == undefined) {
+    //         //     return;
+    //         // }
+    //         // addNeedToVillage(data.village_name.id, {
+    //         //     type: data.need.key,
+    //         //     details: newNeed.details,
+    //         //     name: data.need.name,
+    //         //     created: newNeed.created,
+    //         //     id: newNeed.id,
+    //         //     quantity: newNeed.quantity,
+    //         //     verified: newNeed.verified,
+    //         //     urgency: newNeed.urgency,
+    //         // });
+    //     }
+    // }, [isSuccess]);
 
     const search = async (event: AutoCompleteCompleteEvent) => {
         const results = await filter.suggest(event.query);
@@ -201,7 +197,7 @@ const AddConvoy = ({ village }: AddNeedProps) => {
                     </div>
                    
                     <div className="flex justify-end">
-                        <Button size="small" disabled={isLoading}>Envoyer</Button>
+                        <Button size="small">Envoyer</Button>
                     </div>
                 </form>
             </Dialog>

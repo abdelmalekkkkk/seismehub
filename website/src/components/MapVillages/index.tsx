@@ -1,5 +1,4 @@
 import { memo } from "react"
-import { Village } from "../../hooks/villages"
 import { CircleMarker } from "react-leaflet";
 
 type MapVillagesProps = {

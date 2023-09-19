@@ -26,10 +26,10 @@ const getSeverity = (severity: "LOW" | "MEDIUM" | "HIGH"): Severity => {
 }
 
 const VillageSeverity = (village: Village) => {
-    if (village.severity == "") {
+    if (village.id == "") {
         return null;
     }
-    const severity = getSeverity(village.severity);
+    const severity = getSeverity("LOW");
     return <Tag value={severity.label} severity={severity.tag} />
 }
 

@@ -67,8 +67,6 @@ class Filter {
             return [];
         }
 
-        console.log(state);
-
         const where: SearchParams = {
             population: {
                 between: state.population,
@@ -96,8 +94,6 @@ class Filter {
         if (state.province != "") {
             where.province = state.province
         }
-
-        console.log("wehre", where)
 
         const results = await search(this.index, {
             term: state.term,
