@@ -9,6 +9,10 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
+  "engines": {
+    "node": "16.19.0",
+    "npm": "8.19.3"
+  },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
