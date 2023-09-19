@@ -37,7 +37,7 @@ func main() {
 			for _, village := range villages {
 				record := models.NewRecord(collection)
 				form := forms.NewRecordUpsert(app, record)
-				form.LoadData(map[string]any{
+				formData := map[string]any{
 					"latitude":        village.Latitude,
 					"longitude":       village.Longitude,
 					"population":      village.Population,
@@ -62,10 +62,12 @@ func main() {
 					"has_water_table": village.HasWaterTable == 1,
 					"internal_id":     village.InternalID,
 					"active":          true,
-				})
+				}
+				form.LoadData(formData)
 				err = form.Submit()
 				if err != nil {
 					fmt.Println(err)
+					continue
 				}
 			}
 		},
