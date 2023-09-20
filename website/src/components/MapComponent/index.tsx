@@ -1,6 +1,5 @@
 import { MapContainer, TileLayer } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import { memo } from "react";
 import MapVillages from "../MapVillages";
 import { Map } from "leaflet";
 

@@ -1,7 +1,6 @@
 import { Dialog } from "primereact/dialog";
 import {
     useCloseVillage,
-    useSelectVillage,
     useSelectedVillage,
 } from "../../contexts/MapContext";
 import ModalNeeds from "../ModalNeeds";

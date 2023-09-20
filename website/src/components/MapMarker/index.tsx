@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { CircleMarker, Marker, Tooltip } from "react-leaflet";
+import { Marker, Tooltip } from "react-leaflet";
 import { getIcon } from "./icons";
 
 type MapMarkerProps = {
