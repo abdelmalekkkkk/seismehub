@@ -19,7 +19,7 @@ const useGetVillages = () => {
         queryKey: "villages",
         queryFn: async (): Promise<Village[]> => {
             const villages = await PB.collection("villages").getFullList<VillageResponse>({
-                fields: "id,name,accessible_road,population,menage,region,province,type,commune,altitude,created,latitude,longitude,expand.convoys(village),expand.needs(village)",
+                fields: "id,name,accessible_road,area,risk_slip,risk_flood,risk_snow,risk_cold,population,menage,region,province,type,commune,altitude,created,latitude,longitude,expand.convoys(village),expand.needs(village)",
                 expand: "needs(village),needs(village).need_type,convoys(village),convoys(village).organization,convoys(village).fulfilled_needs",
                 sort: "-created",
                 perPage: 500,

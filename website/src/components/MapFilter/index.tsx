@@ -107,15 +107,23 @@ const MapFilter = ({ applyFilters }: MapFilterProps) => {
         }
     };
 
+    const reset = () => {
+        setFilterData(DefaultFilterState);
+        applyFilters(DefaultFilterState)
+    }
+
     return (
-        <div className="flex flex-col min-h-0 max-h-full">
-            <div className="flex justify-between px-4 mt-4 items-center">
+        <div className="flex flex-col min-h-0 max-h-screen">
+            <div className="px-4 mt-4">
                 <h1 className="text-2xl font-medium tracking-tight text-gray-900">
                     Recherche
                 </h1>
+                <div className="flex justify-end">
+                <Button size="small" className="!mr-2" onClick={() => reset()} outlined>Reset</Button>
                 <Button size="small" onClick={() => applyFilters(filterData)}>
                     Appliquer
                 </Button>
+                </div>
             </div>
             <div className="px-4 mt-4 py-4 border-t border-gray-200 flex-grow flex flex-col gap-3 max-h-full overflow-y-scroll">
                 <div>

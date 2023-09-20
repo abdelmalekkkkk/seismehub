@@ -4,6 +4,7 @@ import { useGetVillage } from "../../contexts/MapContext";
 import AddConvoy from "../AddConvoy";
 import { Calendar, Group } from "iconoir-react";
 import dayjs from "dayjs";
+import { Tooltip } from "primereact/tooltip";
 
 const ModalConvoys = (_village: Village) => {
     const village = useGetVillage(_village.id);
@@ -13,9 +14,15 @@ const ModalConvoys = (_village: Village) => {
         return null;
     }
 
+    const id = "village_convoys-" + village.id;
+
     return (
         <div key={village.id}>
+            <Tooltip target={`#${id}`} className="text-sm" />
             <span
+            id={id}
+            data-pr-at="right+5 center"
+                    data-pr-tooltip="Engazez-vous"
                 onClick={() => setVisible(true)}
                 className="underline font-medium border-b border-dotted text-green-600 cursor-pointer"
             >
@@ -44,7 +51,7 @@ const ModalConvoys = (_village: Village) => {
                                     <Group width={20} className="text-indigo-700" /><span className=" text-gray-800 ml-2">{convoy.ngo_name}</span>
                                 </div>
                                 <div className="flex items-center">
-                                    <Calendar width={20} className="text-indigo-700" /><span className="text-gray-800 ml-2 text-sm">{dayjs(convoy.date).format("DD/MM/YYYY à HH:mm")}</span>
+                                    <Calendar width={20} className="text-indigo-700" /><span className="text-gray-800 ml-2 text-sm">{dayjs(convoy.date).format("DD/MM/YYYY")}</span>
                                 </div>
                                 {convoy.fulfilled_needs != undefined && <ul className="list-disc ml-4">
                                     {convoy.fulfilled_needs.map(need => <li className="text-sm">{need.name}</li>)}

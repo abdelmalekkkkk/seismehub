@@ -10,6 +10,7 @@ type MapContext = {
     villagesMap: Map<string, Village>;
     selectedVillage?: Village;
     selectVillage: (village: Village) => void;
+    panToVillage: (village: Village) => void;
     closeVillage: () => void;
     setMap: (map: LeafletMap) => void;
     setTable: (dataTable: RefObject<DataTable<Village[]> | undefined>) => void;
@@ -17,6 +18,7 @@ type MapContext = {
     filter: Filter;
     needsTypes: NeedType[];
     addNeedToVillage: (villageID: string, need: Need) => void;
+    addConvoyToVillage: (villageID: string, convoy: Convoy) => void;
 };
 
 const MapContext = createContext<MapContext|null>(null);
@@ -65,8 +67,6 @@ const MapProvider = ({ children }: PropsWithChildren) => {
         return filter;
     }, [data]);
 
-    console.log("context state change")
-
     useEffect(() => {
         const newMap = buildVillagesMap(data ?? []);
         setVillagesMap(newMap);
@@ -83,6 +83,14 @@ const MapProvider = ({ children }: PropsWithChildren) => {
 
     const applyFilters = useCallback(_applyFilters, [filter,map]);
 
+    const _panToVillage = (village: Village) => {
+        map?.flyTo([village.latitude, village.longitude], 18, {
+            duration: 1
+        });
+    }
+
+    const panToVillage = useCallback(_panToVillage, [map]);
+
     const _selectVillage = (village: Village) => {
         setSelectedVillage(currentVillage => {
             if (currentVillage == undefined || currentVillage.id != village.id) {
@@ -92,15 +100,6 @@ const MapProvider = ({ children }: PropsWithChildren) => {
             return currentVillage;
         });
     };
-
-    useEffect(() => {
-        if (selectedVillage == undefined) {
-            return;
-        }
-        map?.flyTo([selectedVillage.latitude, selectedVillage.longitude], 18, {
-            duration: 1
-        });
-    }, [selectedVillage, map]);
 
     const selectVillage = useCallback(_selectVillage, []);
 
@@ -136,15 +135,33 @@ const MapProvider = ({ children }: PropsWithChildren) => {
 
     const addNeedToVillage = useCallback(_addNeedToVillage, [_addNeedToVillage]);
 
+    const _addConvoyToVillage = (villageID: string, convoy: Convoy) => {
+        const newMap = new Map(villagesMap);
+        const village = newMap.get(villageID);
+        
+        if (village == undefined) {
+            return;
+        }
+
+        village.convoys.push(convoy);
+
+        newMap.set(villageID, village);
+        setVillagesMap(newMap);
+    }
+
+    const addConvoyToVillage = useCallback(_addConvoyToVillage, [_addConvoyToVillage]);
+
     return <MapContext.Provider value={{
         selectedVillage,
         selectVillage,
+        panToVillage,
         closeVillage,
         setMap,
         setTable,
         applyFilters,
         villagesMap,
         addNeedToVillage,
+        addConvoyToVillage,
         villages: filteredVillages,
         filter,
         needsTypes: needsTypes ?? [],
@@ -171,6 +188,16 @@ const useSelectVillage = () => {
     }
 
     return context.selectVillage;
+}
+
+const usePanToVillage = () => {
+    const context = useContext(MapContext);
+
+    if (context == null) {
+        throw new Error("the map provider is not initialized");
+    }
+
+    return context.panToVillage;
 }
 
 const useCloseVillage = () => {
@@ -264,10 +291,21 @@ const useAddNeedToVillage = () => {
     return context.addNeedToVillage;
 }
 
+const useAddConvoyToVillage = () => {
+    const context = useContext(MapContext);
+
+    if (context == null) {
+        throw new Error("the map provider is not initialized");
+    }
+
+    return context.addConvoyToVillage;
+}
+
 export {
     MapProvider,
     useSelectedVillage,
     useSelectVillage,
+    usePanToVillage,
     useCloseVillage,
     useVillages,
     useSetMap,
@@ -277,5 +315,6 @@ export {
     useNeedsTypes,
     useGetVillage,
     useAddNeedToVillage,
+    useAddConvoyToVillage,
     DefaultFilterState
 }

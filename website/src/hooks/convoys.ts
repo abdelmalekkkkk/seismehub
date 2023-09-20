@@ -4,10 +4,9 @@ import PB from "../PB";
 
 const useAddConvoy = () => {
     const mutation = useMutation({
-        mutationFn: async (convoy: Convoy) => {
-            const c = {...convoy, id: undefined};
-            delete c.id;
-            await PB.collection("convoys").create(convoy)
+        mutationFn: async (convoy: AddConvoy) => {
+            const result = await PB.collection("convoys").create(convoy);
+            return result as unknown as ConvoyResponse;
         }
     })
 

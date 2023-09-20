@@ -61,3 +61,11 @@ interface AddNeed {
     quantity: number;
     details: string;
 }
+
+interface AddConvoy {
+    village: string;
+    ngo_name: string;
+    fulfilled_needs: string[];
+    date: string;
+    details: string;
+}

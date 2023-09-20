@@ -10,14 +10,13 @@ type MapComponentProps = {
     setMap: (arg0: Map) => void;
 };
 const MapComponent = ({ villages, onSelect, setMap }: MapComponentProps) => {
-
     return (
         <MapContainer
-            preferCanvas={false}
+            preferCanvas={true}
             className="map"
             center={[31.1, -8.48]}
-            zoom={8}
-            minZoom={8}
+            zoom={7}
+            minZoom={6}
             attributionControl={false}
             ref={setMap}
         >
@@ -25,7 +24,7 @@ const MapComponent = ({ villages, onSelect, setMap }: MapComponentProps) => {
 
             <MarkerClusterGroup
                 chunkedLoading
-                maxClusterRadius={200}
+                maxClusterRadius={100}
                 polygonOptions={{
                     smoothFactor: 0,
                     stroke: false,
@@ -38,4 +37,4 @@ const MapComponent = ({ villages, onSelect, setMap }: MapComponentProps) => {
     );
 };
 
-export default memo(MapComponent);
+export default MapComponent;

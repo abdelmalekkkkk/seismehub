@@ -1,7 +1,7 @@
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { ChangeEvent, FormEvent, useState } from "react";
-import { useMapFilter, useNeedsTypes } from "../../contexts/MapContext";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { useAddConvoyToVillage, useMapFilter, useNeedsTypes } from "../../contexts/MapContext";
 import {
     AutoComplete,
     AutoCompleteChangeEvent,
@@ -10,7 +10,9 @@ import {
 import { InputTextarea } from "primereact/inputtextarea";
 import { InputText } from "primereact/inputtext";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
-import { Calendar } from "primereact/calendar";
+import { Calendar, CalendarChangeEvent } from "primereact/calendar";
+import { useAddConvoy } from "../../hooks/convoys";
+import { toast } from "react-toastify";
 
 type AddNeedProps = {
     village?: Village;
@@ -18,13 +20,15 @@ type AddNeedProps = {
 
 type AddConvoyData = {
     village_name?: VillageName;
-    needs: NeedTypeKey[];
+    needs: NeedType[];
     ngo_name: string;
     details: string;
     date: string;
 };
 
+
 const AddConvoy = ({ village }: AddNeedProps) => {
+    
     const currentVillageName =
         village == undefined
             ? undefined
@@ -33,15 +37,18 @@ const AddConvoy = ({ village }: AddNeedProps) => {
                   id: village.id,
               };
 
+              const defaultState = {
+                village_name: currentVillageName,
+                    ngo_name: "",
+                    needs: [],
+                    details: "",
+                    date: "",
+            };
+            
+
     const [open, setOpen] = useState(false);
 
-    const [data, setData] = useState<AddConvoyData>({
-        village_name: currentVillageName,
-        ngo_name: "",
-        needs: [],
-        details: "",
-        date: "",
-    });
+    const [data, setData] = useState<AddConvoyData>(defaultState);
 
     const needsTypes = useNeedsTypes();
 
@@ -49,44 +56,41 @@ const AddConvoy = ({ village }: AddNeedProps) => {
 
     const [items, setItems] = useState<VillageName[]>([]);
 
-    // const addNeedToVillage = useAddNeedToVillage();
-    // const { mutate, isLoading, isSuccess, data: newNeed } = useAddNeed();
+    const addConvoyToVillage = useAddConvoyToVillage();
+    const { mutate, isLoading, isSuccess, data: newConvoy } = useAddConvoy();
 
     const handleOnSubmit = (e: FormEvent) => {
         e.preventDefault()
-        // mutate({
-        //     village: data.village_name?.id ?? "",
-        //     need_type: data.need?.id ?? "",
-        //     details: data.details ?? "",
-        //     quantity: data.quantity ?? 0,
-        // })
+        mutate({
+            village: data.village_name?.id ?? "",
+            fulfilled_needs: data.needs.map(n => n.id),
+            ngo_name: data.ngo_name,
+            date: data.date,
+            details: data.details,
+        })
     }
 
-    // useEffect(() => {
-    //     if (isSuccess) {
-    //         toast.success("Votre engagement a été enregistré avec succès.")
-    //         // Close the modal
-    //         // setOpen(false);
-    //         // // Reset form
-    //         // setData({
-    //         //     village_name: currentVillageName,
-    //         // })
-    //         // // Update the village's needs
-    //         // if (data.village_name?.id == undefined || data.need == undefined) {
-    //         //     return;
-    //         // }
-    //         // addNeedToVillage(data.village_name.id, {
-    //         //     type: data.need.key,
-    //         //     details: newNeed.details,
-    //         //     name: data.need.name,
-    //         //     created: newNeed.created,
-    //         //     id: newNeed.id,
-    //         //     quantity: newNeed.quantity,
-    //         //     verified: newNeed.verified,
-    //         //     urgency: newNeed.urgency,
-    //         // });
-    //     }
-    // }, [isSuccess]);
+    useEffect(() => {
+        if (isSuccess) {
+            toast.success("Votre engagement a été enregistré avec succès.")
+            // Close the modal
+            setOpen(false);
+            // Reset form
+            setData(defaultState)
+            // Update the village's needs
+            if (data.village_name?.id == undefined) {
+                return;
+            }
+            addConvoyToVillage(data.village_name.id, {
+                id: newConvoy.id,
+                created: newConvoy.created,
+                date: data.date,
+                details: data.details,
+                ngo_name: data.ngo_name,
+                fulfilled_needs: data.needs,
+            });
+        }
+    }, [isSuccess]);
 
     const search = async (event: AutoCompleteCompleteEvent) => {
         const results = await filter.suggest(event.query);
@@ -100,16 +104,23 @@ const AddConvoy = ({ village }: AddNeedProps) => {
         });
     };
 
+    const changeNGOName = (event: ChangeEvent<HTMLInputElement>) => {
+        setData({
+            ...data,
+            ngo_name: event.target.value,
+        });
+    };
+
     const changeNeeds = (e: CheckboxChangeEvent) => {
         if (e.checked) {
             setData(data => ({
                 ...data,
-                needs: [...data.needs, e.value.key]
+                needs: [...data.needs, e.value]
             }));
         } else {
             setData(data => ({
                 ...data,
-                needs: data.needs.filter(needType => needType != e.value.key)
+                needs: data.needs.filter(needType => needType.key != e.value.key)
             }));
         }
     }
@@ -118,7 +129,15 @@ const AddConvoy = ({ village }: AddNeedProps) => {
         setData({
             ...data,
             details: event.target.value,
-        })
+        });
+    }
+
+    const changeDate = (event: CalendarChangeEvent) => {
+        const date = event.value as Date;
+        setData({
+            ...data,
+            date: date.toUTCString()
+        });
     }
 
 
@@ -142,8 +161,7 @@ const AddConvoy = ({ village }: AddNeedProps) => {
                 }}
             >
                 <p className="text-sm text-gray-500">
-                    Veuillez remplir ce formulaire pour nous informer de ce dont
-                    un Douar a besoin.
+                Veuillez remplir ce formulaire si vous avez l'intention d'envoyer de l'aide à ce village, ou si vous avez déjà envoyé de l'aide.
                 </p>
                 <form className="grid grid-cols-1 gap-4 mt-4" onSubmit={handleOnSubmit}>
                     <div className="grid grid-cols-1 gap-2">
@@ -170,7 +188,7 @@ const AddConvoy = ({ village }: AddNeedProps) => {
                         >
                             Nom de l'association
                         </label>
-                        <InputText className="p-inputtext-sm" />
+                        <InputText className="p-inputtext-sm" onChange={changeNGOName} value={data.ngo_name} />
                     </div>
                     <div className="grid grid-cols-1 gap-2">
                         <label className="text-sm font-bold">
@@ -178,7 +196,7 @@ const AddConvoy = ({ village }: AddNeedProps) => {
                         </label>
                         <div className="grid gap-1">
                             {needsTypes.map(need => <div key={need.key} className="flex items-center">
-                                <Checkbox inputId={`need_type-${need.key}`} checked={data.needs.find(needType => needType == need.key) != undefined} onChange={changeNeeds} value={need} />
+                                <Checkbox inputId={`need_type-${need.key}`} checked={data.needs.find(needType => needType.key == need.key) != undefined} onChange={changeNeeds} value={need} />
                                 <label className="text-sm ml-2 cursor-pointer" htmlFor={`need_type-${need.key}`}>{need.name}</label>
                             </div>)}
                         </div>
@@ -187,7 +205,7 @@ const AddConvoy = ({ village }: AddNeedProps) => {
                         <label htmlFor={`need_description`} className="text-sm font-bold">
                             Date d'engagement
                         </label>
-                        <Calendar inputClassName="p-inputtext-sm" panelStyle={{minWidth: "auto", width: "auto"}}/>
+                        <Calendar inputClassName="p-inputtext-sm" panelStyle={{minWidth: "auto", width: "auto"}} onChange={changeDate}/>
                     </div>
                     <div className="grid grid-cols-1 gap-2">
                         <label htmlFor={`need_description`} className="text-sm font-bold">
@@ -197,7 +215,7 @@ const AddConvoy = ({ village }: AddNeedProps) => {
                     </div>
                    
                     <div className="flex justify-end">
-                        <Button size="small">Envoyer</Button>
+                        <Button size="small" disabled={isLoading}>Envoyer</Button>
                     </div>
                 </form>
             </Dialog>

@@ -10,10 +10,11 @@ import VillageAccessibility from "../VillageAccessibllity";
 type MapResultsProps = {
     villages: Village[];
     onSelect: (arg0: Village) => void;
+    onPan: (arg0: Village) => void;
     setTable: (tableRef: RefObject<DataTable<Village[]> | undefined>) => void;
 };
 
-const MapResults = ({ villages, onSelect, setTable }: MapResultsProps) => {
+const MapResults = ({ villages, onSelect, onPan, setTable }: MapResultsProps) => {
     const ref = createRef<HTMLDivElement>();
     const tableRef = createRef<DataTable<Village[]>>();
     const height = useRef("");
@@ -38,13 +39,22 @@ const MapResults = ({ villages, onSelect, setTable }: MapResultsProps) => {
                 value={villages}
                 scrollable
                 scrollHeight={height.current}
-                virtualScrollerOptions={{ itemSize: 55 }}
+                virtualScrollerOptions={{ itemSize: 52 }}
                 ref={tableRef}
+                rows={villages.length}
             >
                 <Column
                     field="name"
                     header="Nom"
                     sortable
+                    body={(v: Village) => (
+                        <div key={v.id}>
+                            <span
+                                onClick={() => onSelect(v)}
+                                className=" text-indigo-800 font-medium underline cursor-pointer"
+                            >{v.name}</span>
+                        </div>
+                    )}
                     style={{ width: "20%" }}
                 />
                 <Column
@@ -87,7 +97,7 @@ const MapResults = ({ villages, onSelect, setTable }: MapResultsProps) => {
                     body={(v: Village) => (
                         <div key={v.id}>
                             <span
-                                onClick={() => onSelect(v)}
+                                onClick={() => onPan(v)}
                                 className="pi pi-map-marker text-indigo-800 cursor-pointer"
                             ></span>
                         </div>

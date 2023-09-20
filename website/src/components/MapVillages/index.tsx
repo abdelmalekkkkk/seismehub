@@ -1,29 +1,24 @@
-import { memo } from "react"
+import { memo } from "react";
 import { CircleMarker } from "react-leaflet";
+import MapMarker from "../MapMarker";
 
 type MapVillagesProps = {
     villages: Village[];
     onSelect: (village: Village) => void;
-}
+};
 
-const MapVillages = ({ villages, onSelect } : MapVillagesProps) => {
-    return <>
-        {villages.map((village) => (
-                    <CircleMarker
-                        className="marker"
-                        key={village.id}
-                        center={[village.latitude, village.longitude]}
-                        color="#e54d2e"
-                        fillOpacity={0.3}
-                        radius={8}
-                        eventHandlers={{
-                            click: () => {
-                                onSelect(village);
-                            },
-                        }}
-                    />
-                ))}
-    </>
-}
+const MapVillages = ({ villages, onSelect }: MapVillagesProps) => {
+    return (
+        <>
+            {villages.map((village) => (
+                <MapMarker
+                    key={village.id}
+                    village={village}
+                    onSelect={onSelect}
+                />
+            ))}
+        </>
+    );
+};
 
-export default memo(MapVillages);
+export default MapVillages;
